@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,19 +19,18 @@ namespace Challenge2
 
     class Program
     {
-        // Data
-        static string containerA = "Container A";
-        static string containerB = "Container B";
-        static string containerC = "Container C";
+        private const string Ship1Data = @"c:\ship1_data.txt";
+        private const string Ship2Data = @"c:\ship2_data.txt";
 
-        static string containerD = "Container D";
-        static string containerE = "Container E";
 
-        static string[] ship1Load = new string[] { containerA, containerB, containerC };
-        static string[] ship2Load = new string[] { containerD, containerE };
+        private static string[] ship1Load = new string[3];
+        private static string[] ship2Load = new string[2];
+
+
 
         static void Main(string[] args)
         {
+            LoadDate();
             Console.WriteLine("Current load:");
             PrintLoad();
 
@@ -58,6 +58,56 @@ namespace Challenge2
 
             goto again;
         }
+
+        private static void LoadDate()
+        {
+            if (!File.Exists(Ship1Data))
+            {
+                // Data
+                string containerA = "Container A";
+                string containerB = "Container B";
+                string containerC = "Container C";
+
+                string containerD = "Container D";
+                string containerE = "Container E";
+
+                ship1Load = new string[] { containerA, containerB, containerC };
+                ship2Load = new string[] { containerD, containerE };
+
+            }
+            else
+            {
+                LoadData(ref ship1Load, Ship1Data);
+                LoadData(ref ship2Load, Ship2Data);
+            }
+           
+        }
+
+        private static void LoadData(ref string[] ship, string filePath)
+        {
+            try
+            {
+                var list = new List<string>();
+
+                using (var sr = new StreamReader(filePath))
+                {
+                    string line;
+
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        list.Add(line);
+                    }
+                }
+
+                ship = list.ToArray();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
 
         private static bool ContainerFound(string[] ship, string container)
         {
@@ -95,6 +145,29 @@ namespace Challenge2
 
             shipFrom = shipFromList.ToArray();
             shipTo = shipToList.ToArray();
+
+            SaveData(shipFrom, Ship1Data);
+            SaveData(shipTo, Ship2Data);
+        }
+
+        private static void SaveData(string[] ship, string filePath)
+        {
+            try
+            {
+                using (var sw = new StreamWriter(filePath))
+                {
+                    foreach (var container in ship)
+                    {
+                        sw.WriteLine(container);
+                    }
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
         }
     }
 }
