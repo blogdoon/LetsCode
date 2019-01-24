@@ -34,7 +34,7 @@ namespace Challenge2
             Console.WriteLine("Current load:");
             PrintLoad();
 
-            again:
+        again:
             // data entry
             Console.Write("Load:");
             var load = Console.ReadLine();
@@ -44,43 +44,13 @@ namespace Challenge2
             if (load == "")
                 return;
 
-            bool found = false;
-            for (int i = 0; i < ship1Load.Length; i++)
-            {
-                if (ship1Load[i] == load)
-                    found = true;
-            }
-            if (!found)
+            if (!ContainerFound(ship1Load, load))
             {
                 Console.WriteLine("Load " + load + " was not found on ship 1!");
                 goto again;
             }
 
-            string[] newLoadShip1 = new string[ship1Load.Length - 1];
-            bool after = false;
-            for (int index = 0; index < ship1Load.Length; index++)
-            {
-                if (after)
-                {
-                    newLoadShip1[index - 1] = ship1Load[index];
-                }
-                else
-                {
-                    newLoadShip1[index] = ship1Load[index];
-                    after = ship1Load[index] == load;
-                }
-            }
-
-            ship1Load = newLoadShip1;
-
-            string[] newLoadShip2 = new string[ship2Load.Length + 1];
-            for (int index = 0; index < ship2Load.Length; index++)
-            {
-                newLoadShip2[index] = ship2Load[index];
-            }
-            newLoadShip2[newLoadShip2.Length - 1] = load;
-
-            ship2Load = newLoadShip2;
+            TransferContainer(ref ship1Load, ref ship2Load, load);
 
             // Ausgabe
             Console.WriteLine(load + " was transfered from ship 1 to ship 2!");
@@ -89,10 +59,42 @@ namespace Challenge2
             goto again;
         }
 
+        private static bool ContainerFound(string[] ship, string container)
+        {
+            foreach (var item in ship)
+            {
+                if (item.Equals(container)) return true;
+            }
+
+            return false;
+        }
+
         private static void PrintLoad()
         {
             Console.WriteLine("Ship 1: " + String.Join(", ", ship1Load));
             Console.WriteLine("Ship 2: " + String.Join(", ", ship2Load));
+        }
+
+        public static void TransferContainer(ref string[] shipFrom, ref string[] shipTo, string container)
+        {
+            var shipFromList = new List<string>();
+
+            var shipToList = shipTo.ToList();
+
+            foreach (var load in shipFrom)
+            {
+                if (load.Equals(container))
+                {
+                    shipToList.Add(load);
+                }
+                else
+                {
+                    shipFromList.Add(load);
+                }
+            }
+
+            shipFrom = shipFromList.ToArray();
+            shipTo = shipToList.ToArray();
         }
     }
 }
