@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Challenge1
@@ -6,6 +7,25 @@ namespace Challenge1
 
     public class Unreadable
     {
+
+        public void RemoveItem(string str, ref string[] array)
+        {
+            var list = new List<string>();
+
+            foreach (var item in array)
+            {
+                if (!item.Equals(str))
+                {
+                    list.Add(item);
+                }
+            }
+
+            array = list.ToArray();
+        }
+
+
+
+
         public void Do(string element, ref string[] array)
         {
             // Parameter
