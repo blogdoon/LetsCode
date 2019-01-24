@@ -4,6 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
+using Challenge;
+using static System.Console;
 
 namespace Challenge2
 {
@@ -19,70 +22,119 @@ namespace Challenge2
 
     class Program
     {
-        private const string Ship1Data = @"c:\ship1_data.txt";
-        private const string Ship2Data = @"c:\ship2_data.txt";
+        private const string filePath = @"c:\fleet.xml";
 
         private const int MaxLoad = 4;
 
-        private static string[] ship1Load = new string[3];
-        private static string[] ship2Load = new string[2];
+        private static List<Ship> _fleet = new List<Ship>();
 
 
 
         static void Main(string[] args)
         {
-            LoadDate();
-            Console.WriteLine("Current load:");
-            PrintLoad();
-
-        again:
-            // data entry
-            Console.Write("Load:");
-            var load = Console.ReadLine();
-
-            // logic
-
-            if (load == "")
-                return;
-
-            if (!ContainerFound(ship1Load, load))
+            if (File.Exists(filePath))
             {
-                Console.WriteLine("Load " + load + " was not found on ship 1!");
-                goto again;
-            }
-
-            TransferContainer(ref ship1Load, ref ship2Load, load);
-
-            // Ausgabe
-            Console.WriteLine(load + " was transfered from ship 1 to ship 2!");
-            PrintLoad();
-
-            goto again;
-        }
-
-        private static void LoadDate()
-        {
-            if (!File.Exists(Ship1Data))
-            {
-                // Data
-                string containerA = "Container A";
-                string containerB = "Container B";
-                string containerC = "Container C";
-
-                string containerD = "Container D";
-                string containerE = "Container E";
-
-                ship1Load = new string[] { containerA, containerB, containerC };
-                ship2Load = new string[] { containerD, containerE };
+                _fleet = Load<List<Ship>>(filePath);
 
             }
             else
             {
-                LoadData(ref ship1Load, Ship1Data);
-                LoadData(ref ship2Load, Ship2Data);
+                SeedData();
             }
-           
+
+            int key;
+        menu:
+            do
+            {
+                WriteLine("\nTo Create ship press 1 to Transfer load press 2");
+                key = ReadKey().KeyChar;
+            } while (key != 49 && key != 50);
+
+            if (key == 49)
+            {
+                WriteLine("\nPlease enter ship name:");
+
+                var shipName = ReadLine();
+
+                var ship = new Ship(shipName);
+
+            addContainer:
+                WriteLine("\nTo Add conttainer press 1 to continue press 2");
+                var choice = ReadKey().KeyChar;
+
+                if (choice == 49)
+                {
+                    WriteLine("\nAdd container");
+                    ship.Containers.Add(ReadLine());
+                    if (ship.Containers.Count < 3)
+                        goto addContainer;
+
+                }
+
+                if (ship.Containers.Count < 4 && choice == 44) goto addContainer;
+
+
+                _fleet.Add(ship);
+
+                Save(_fleet, filePath);
+
+                goto menu;
+
+
+
+            }
+
+            Console.WriteLine("Current load:");
+            PrintLoad();
+
+        chooseShipFrom:
+            WriteLine("\nEnter the name ship from");
+            string shipFromName = ReadLine();
+            var shipFrom = _fleet.FirstOrDefault(s => s.Name.Equals(shipFromName));
+            if (shipFrom == null) goto chooseShipFrom;
+
+            chooseLoad:
+            WriteLine("\nEnter the name of the load");
+            var load = ReadLine();
+
+            if (load == "" || !shipFrom.Containers.Any(c => c.Equals(load))) goto chooseLoad;
+
+            chooseShipTo:
+            WriteLine("\nEnter the name ship to");
+            string shipToName = ReadLine();
+            var shipTo = _fleet.FirstOrDefault(s => s.Name.Equals(shipToName));
+            if (shipTo == null) goto chooseShipTo;
+
+
+            WriteLine(load + $" was transfered from {shipFromName} to {shipToName}!");
+
+            TransferContainer(shipFrom, shipTo, load);
+
+            Save(_fleet, filePath);
+
+            PrintLoad();
+
+            goto chooseShipFrom;
         }
+
+        private static void SeedData()
+        {
+            var ship1Load = new Ship("ship1Load");
+            ship1Load.Containers = new List<string>()
+            {
+                "container A", "container B", "container C"
+            };
+            var ship2Load = new Ship("ship2Load");
+            ship2Load.Containers = new List<string>()
+            {
+                "container D", "container E"
+            };
+
+            _fleet.Add(ship1Load);
+            _fleet.Add(ship2Load);
+
+        }
+
 
         private static void LoadData(ref string[] ship, string filePath)
         {
@@ -122,58 +174,54 @@ namespace Challenge2
 
         private static void PrintLoad()
         {
-            Console.WriteLine("Ship 1: " + String.Join(", ", ship1Load));
-            Console.WriteLine("Ship 2: " + String.Join(", ", ship2Load));
+            foreach (var ship in _fleet)
+            {
+                WriteLine("\n");
+                WriteLine($"{ship.Name}: {String.Join(", ", ship.Containers.ToArray())}");
+            }
         }
 
-        public static void TransferContainer(ref string[] shipFrom, ref string[] shipTo, string container)
+        public static void TransferContainer(Ship shipFrom, Ship shipTo, string container)
         {
 
-            if (shipTo.Length >= MaxLoad) return;
+            if (shipTo.Containers.Count >= MaxLoad) return;
 
-            var shipFromList = new List<string>();
+            shipFrom.Containers.Remove(container);
+            shipTo.Containers.Add(container);
 
-            var shipToList = shipTo.ToList();
-
-            foreach (var load in shipFrom)
-            {
-                if (load.Equals(container))
-                {
-                    shipToList.Add(load);
-                }
-                else
-                {
-                    shipFromList.Add(load);
-                }
-
-            }
-            
-
-            shipFrom = shipFromList.ToArray();
-            shipTo = shipToList.ToArray();
-
-            SaveData(shipFrom, Ship1Data);
-            SaveData(shipTo, Ship2Data);
         }
 
-        private static void SaveData(string[] ship, string filePath)
+        public static bool Save(Object obj, string filePath)
         {
-            try
-            {
-                using (var sw = new StreamWriter(filePath))
-                {
-                    foreach (var container in ship)
-                    {
-                        sw.WriteLine(container);
-                    }
-                }
+            var xs = new XmlSerializer(obj.GetType());
 
-            }
-            catch (Exception e)
+            using (var sw = new StreamWriter(filePath))
             {
-                Console.WriteLine(e);
+
+                xs.Serialize(sw, obj);
             }
-            
+
+            if (File.Exists(filePath))
+                return true;
+            else return false;
+        }
+
+        public static T Load<T>(string filePath)
+        {
+            Object result;
+
+            if (File.Exists(filePath))
+            {
+                var xs = new XmlSerializer(typeof(T));
+
+                using (var sr = new StreamReader(filePath))
+                {
+                    result = (T)xs.Deserialize(sr);
+                }
+                return (T)result;
+            }
+
+            return default(T);
         }
     }
 }
