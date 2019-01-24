@@ -22,6 +22,7 @@ namespace Challenge2
         private const string Ship1Data = @"c:\ship1_data.txt";
         private const string Ship2Data = @"c:\ship2_data.txt";
 
+        private const int MaxLoad = 4;
 
         private static string[] ship1Load = new string[3];
         private static string[] ship2Load = new string[2];
@@ -127,6 +128,9 @@ namespace Challenge2
 
         public static void TransferContainer(ref string[] shipFrom, ref string[] shipTo, string container)
         {
+
+            if (shipTo.Length >= MaxLoad) return;
+
             var shipFromList = new List<string>();
 
             var shipToList = shipTo.ToList();
@@ -141,7 +145,9 @@ namespace Challenge2
                 {
                     shipFromList.Add(load);
                 }
+
             }
+            
 
             shipFrom = shipFromList.ToArray();
             shipTo = shipToList.ToArray();
