@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Challenge;
 using static System.Console;
+
 
 namespace Challenge2
 {
@@ -22,7 +22,7 @@ namespace Challenge2
 
     class Program
     {
-        private const string filePath = @"c:\fleet.xml";
+        private const string filePath = @"c:\feet.xml";
 
         private const int MaxLoad = 4;
 
@@ -52,9 +52,22 @@ namespace Challenge2
 
             if (key == 49)
             {
-                WriteLine("\nPlease enter ship name:");
+                string shipName;
+                do
+                {
+                    WriteLine("\nPlease enter ship name:");
+                    shipName = ReadLine();
+                } while (string.IsNullOrEmpty(shipName));
 
-                var shipName = ReadLine();
+
+                int capacity;
+                do
+                {
+                    WriteLine("\nPlease enter ship capacity:");
+                    capacity = Convert.ToInt32(ReadLine());
+                } while (capacity <= 0);
+
+
 
                 var ship = new Ship(shipName);
 
@@ -66,12 +79,12 @@ namespace Challenge2
                 {
                     WriteLine("\nAdd container");
                     ship.Containers.Add(ReadLine());
-                    if (ship.Containers.Count < 3)
+                    if (ship.Containers.Count < ship.Capacity)
                         goto addContainer;
 
                 }
 
-                if (ship.Containers.Count < 4 && choice == 44) goto addContainer;
+                if (ship.Containers.Count < ship.Capacity && choice == 44) goto addContainer;
 
 
                 _fleet.Add(ship);
@@ -120,11 +133,13 @@ namespace Challenge2
         private static void SeedData()
         {
             var ship1Load = new Ship("ship1Load");
+            ship1Load.Capacity = 4;
             ship1Load.Containers = new List<string>()
             {
                 "container A", "container B", "container C"
             };
             var ship2Load = new Ship("ship2Load");
+            ship2Load.Capacity = 4;
             ship2Load.Containers = new List<string>()
             {
                 "container D", "container E"
@@ -135,42 +150,6 @@ namespace Challenge2
 
         }
 
-
-        private static void LoadData(ref string[] ship, string filePath)
-        {
-            try
-            {
-                var list = new List<string>();
-
-                using (var sr = new StreamReader(filePath))
-                {
-                    string line;
-
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        list.Add(line);
-                    }
-                }
-
-                ship = list.ToArray();
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
-
-
-        private static bool ContainerFound(string[] ship, string container)
-        {
-            foreach (var item in ship)
-            {
-                if (item.Equals(container)) return true;
-            }
-
-            return false;
-        }
 
         private static void PrintLoad()
         {
@@ -184,7 +163,7 @@ namespace Challenge2
         public static void TransferContainer(Ship shipFrom, Ship shipTo, string container)
         {
 
-            if (shipTo.Containers.Count >= MaxLoad) return;
+            if (shipTo.Containers.Count >= shipTo.Capacity) return;
 
             shipFrom.Containers.Remove(container);
             shipTo.Containers.Add(container);

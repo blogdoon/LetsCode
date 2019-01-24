@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Challenge
+namespace Challenge2
 {
     [Serializable]
     public class Ship
@@ -22,5 +22,6 @@ namespace Challenge
         }
         public List<string> Containers { get; set; }
         public string Name { get; set; }
+        public int Capacity { get; set; }
     }
 }
