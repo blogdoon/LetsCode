@@ -22,7 +22,7 @@ namespace Challenge2
 
     class Program
     {
-        private const string filePath = @"c:\feet.xml";
+        private const string filePath = @"c:\fleet.xml";
 
         private const int MaxLoad = 4;
 
@@ -46,48 +46,51 @@ namespace Challenge2
         menu:
             do
             {
-                WriteLine("\nTo Create ship press 1 to Transfer load press 2");
+                WriteLine("\nTo Create truck press 0 ship press 1 to Transfer load press 2");
                 key = ReadKey().KeyChar;
-            } while (key != 49 && key != 50);
+                WriteLine(key);
+            } while (key != 48 && key != 49 && key != 50);
 
-            if (key == 49)
+            if (key == 49 || key == 48)
             {
-                string shipName;
+                string name;
                 do
                 {
-                    WriteLine("\nPlease enter ship name:");
-                    shipName = ReadLine();
-                } while (string.IsNullOrEmpty(shipName));
+                    WriteLine("\nPlease enter ship or truck name:");
+                    name = ReadLine();
+                } while (string.IsNullOrEmpty(name));
 
 
                 int capacity;
                 do
                 {
-                    WriteLine("\nPlease enter ship capacity:");
+                    WriteLine("\nPlease enter capacity:");
                     capacity = Convert.ToInt32(ReadLine());
                 } while (capacity <= 0);
 
 
+                Ship vehicle;
 
-                var ship = new Ship(shipName);
+                if (key == 48) vehicle = new Truck(name);
+                else vehicle = new Ship(name);
 
-            addContainer:
+                addContainer:
                 WriteLine("\nTo Add conttainer press 1 to continue press 2");
                 var choice = ReadKey().KeyChar;
 
                 if (choice == 49)
                 {
                     WriteLine("\nAdd container");
-                    ship.Containers.Add(ReadLine());
-                    if (ship.Containers.Count < ship.Capacity)
+                    vehicle.Containers.Add(ReadLine());
+                    if (vehicle.Containers.Count < vehicle.Capacity)
                         goto addContainer;
 
                 }
 
-                if (ship.Containers.Count < ship.Capacity && choice == 44) goto addContainer;
+                if (vehicle.Containers.Count < vehicle.Capacity && choice == 44) goto addContainer;
 
 
-                _fleet.Add(ship);
+                _fleet.Add(vehicle);
 
                 Save(_fleet, filePath);
 
