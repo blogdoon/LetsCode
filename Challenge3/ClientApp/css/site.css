@@ -2,6 +2,20 @@
     margin-right: 10px;
 }
 
+.redBox {
+    color: red;
+    border: solid gray 1px;
+    background: #e9e6e6;
+    fontSize: 130%;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.server-time {
+    color: blue;
+    font-weight: bold;
+}
 /* Highlighting rules for nav menu items */
 .main-nav li a.active,
 .main-nav li a.active:hover,

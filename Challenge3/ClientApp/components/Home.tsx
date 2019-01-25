@@ -1,23 +1,38 @@
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-var redBox = {
-    color: 'red',
-    border: 'solid red 1px',
-    fontSize: '130%'
+interface State {
+    curTime: string;
 }
 
-export default class Home extends React.Component<RouteComponentProps<{}>, {}> {
+export default class Home extends React.Component<RouteComponentProps<{}>, State> {
+
+      //constructor() {
+      //  super();
+      //  this.state = { curTime: new Date() };
+      //}
+    constructor() {
+        super();
+        this.state = { curTime: new Date().toLocaleString()};
+    }
+    componentDidMount() {
+        setInterval(() => {
+            this.setState({
+                curTime: new Date().toLocaleString()
+            })
+        }, 1000)
+    }
+
     public render() {
         return <div>
             <h1>Hello, world!</h1>
 
-            <div style={redBox}>
+            <div className='redBox'>
                 <h1>Todo</h1>
                 <ul>
                     <li>1: Add a menu item "Hello" to the left side and display</li>
                     <li>2: Move the inline style of this red box to an external css file and try to make the box nicer</li>
-                    <li>3: Display the server time here: </li>
+                    <li>3: Display the server time here: <span className='server-time'> {this.state.curTime} </span></li>
                 </ul>
             </div>
 
