@@ -74,6 +74,8 @@ namespace Challenge2
                 if (key == 48) vehicle = new Truck(name);
                 else vehicle = new Ship(name);
 
+                vehicle.Capacity = capacity;
+
                 addContainer:
                 WriteLine("\nTo Add conttainer press 1 to continue press 2");
                 var choice = ReadKey().KeyChar;
@@ -167,6 +169,7 @@ namespace Challenge2
         {
 
             if (shipTo.Containers.Count >= shipTo.Capacity) return;
+            if (shipFrom.GetType() == typeof(Truck) && shipFrom.Containers.Count == 1) return;
 
             shipFrom.Containers.Remove(container);
             shipTo.Containers.Add(container);
